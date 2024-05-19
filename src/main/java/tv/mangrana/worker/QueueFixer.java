@@ -15,10 +15,11 @@ import java.util.stream.Collectors;
 public class QueueFixer {
     final static String IMPORT_FAILURE_BECAUSE_MATCHED_BY_ID = "Found matching series via grab history, but release was matched to series by ID. Automatic import is not possible. See the FAQ for details.";
     private final SonarrApiGateway sonarrApiGateway;
-    private FailedImportFixer failedImportFixer;
+    private final FailedImportFixer.Factory failedImportFixerFactory;
 
     QueueFixer() {
         sonarrApiGateway = Sonarr.api();
+        failedImportFixerFactory = FailedImportFixer.factory();
     }
 
     void fix() {
@@ -57,8 +58,9 @@ public class QueueFixer {
             SonarrSerie serie = getSerieFromSonarr(seriesId);
             if (serie == null) return;
 
-            failedImportFixer = FailedImportFixer.of(record, serie);
-            failedImportFixer.fix();
+            failedImportFixerFactory
+                    .newFixerFor(record, serie)
+                    .fix();
         } catch (IOException e) {
             System.out.printf("!! could not fix the import %s%n", record.getTitle());
             e.printStackTrace();

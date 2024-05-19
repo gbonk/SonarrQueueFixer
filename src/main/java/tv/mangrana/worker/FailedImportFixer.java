@@ -14,33 +14,46 @@ import java.util.stream.Collectors;
 public class FailedImportFixer {
     public static final int MINIMUM_FILE_SIZE_TO_BE_CONSIDERED_A_VIDEO = 300000;
     private final Record queueRecord;
-    private final SonarrSerie serie;
     private final MissingFilesDetector missingFilesDetector = new MissingFilesDetector();
+    private final Path torrentPath;
+    private final Path seriePath;
+    private final FileCopier fileCopier;
+    private Path seasonPath;
+
+    static Factory factory() {
+        return new Factory();
+    }
+    public static class Factory {
+        FailedImportFixer newFixerFor(Record queueRecord, SonarrSerie serie){
+            return new FailedImportFixer(queueRecord, serie);
+        }
+    }
 
     private FailedImportFixer(Record queueRecord, SonarrSerie serie) {
         this.queueRecord = queueRecord;
-        this.serie = serie;
-    }
-
-    static FailedImportFixer of(Record queueRecord, SonarrSerie serie) {
-        return new FailedImportFixer(queueRecord, serie);
+        this.torrentPath = Path.of(queueRecord.getOutputPath());
+        this.seriePath = Path.of(serie.getPath());
+        fileCopier = new FileCopier();
     }
 
     void fix() throws IOException {
         System.out.printf("%nfixing: %s%n" ,queueRecord.getTitle());
-        System.out.printf(">> located in: %s%n", queueRecord.getOutputPath());
-
-        var torrentPath = Path.of(queueRecord.getOutputPath());
-        List<Path> torrentFiles = getVideoFilesFrom(torrentPath);
-
-        var seasonFolderName = calculateSeasonPathFrom(torrentPath);
-        var sonarPath = Path.of(serie.getPath());
-        List<Path> sonarFiles = getVideoFilesFrom(sonarPath.resolve(seasonFolderName));
-
-        missingFilesDetector.printDifferencesBetween(torrentFiles, sonarFiles);
+        List<Path> torrentFiles = resolveTorrentFiles();
+        List<Path> sonarFiles = resolveSonarrFiles();
+        List<Path> filesToCopy = missingFilesDetector.getMissingFilesAtDestination(torrentFiles, sonarFiles);
+        filesToCopy.forEach(this::copy);
     }
 
-    private String calculateSeasonPathFrom(Path torrentPath) {
+    private List<Path> resolveTorrentFiles() throws IOException {
+        return getVideoFilesFrom(Path.of(queueRecord.getOutputPath()));
+    }
+
+    private List<Path> resolveSonarrFiles() throws IOException {
+        seasonPath = seriePath.resolve(getSeasonFolder());
+        return getVideoFilesFrom(seasonPath);
+    }
+
+    private String getSeasonFolder() {
         try {
             return StringCaptor.getSeasonFolderNameFromSeason(torrentPath.getFileName().toString());
         } catch (IncorrectWorkingReferencesException e) {
@@ -58,4 +71,9 @@ public class FailedImportFixer {
         }
     }
 
+    private void copy(Path fileToCopy) {
+        Path target = seasonPath.resolve(fileToCopy.getFileName());
+        System.out.println("** going to hardlink file to "+target);
+        fileCopier.hardLink(fileToCopy, target);
+    }
 }

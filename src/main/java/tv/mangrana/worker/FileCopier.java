@@ -5,8 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class FileCopier {
-
-    private void hardLink(Path source, Path destination) {
+    void hardLink(Path source, Path destination) {
         try {
             Files.createLink(destination, source);
         } catch (IOException e) {
@@ -16,9 +15,10 @@ public class FileCopier {
         }
     }
 }
+
 class ProjectPath {
     static Path of(String path) {
         String projectPath = System.getProperty("user.dir");
-        return Path.of(projectPath+path);
+        return Path.of(projectPath + path);
     }
 }
