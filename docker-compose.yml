@@ -1,0 +1,10 @@
+---
+version: "2.1"
+services:
+  after-download-carer:
+    container_name: mangrana_java_sonarr_queue_fix
+    image: xeviff/sonarr_queue_fix:latest
+    volumes:
+      - ./config:/config
+      - /volume1/data/torrents/tv:/data/torrents/tv
+      - /volume1/data/media/tv:/data/media/tv
