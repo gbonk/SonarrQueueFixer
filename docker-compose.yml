@@ -6,5 +6,4 @@ services:
     image: xeviff/sonarr_queue_fix:latest
     volumes:
       - ./config:/config
-      - /volume1/data/torrents/tv:/data/torrents/tv
-      - /volume1/data/media/tv:/data/media/tv
+      - /volume1/data:/data

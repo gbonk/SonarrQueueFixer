@@ -1,6 +1,6 @@
 package tv.mangrana.worker;
 
-import tv.mangrana.config.ConfigFileLoader;
+import tv.mangrana.sonarr.Sonarr;
 import tv.mangrana.sonarr.api.client.gateway.SonarrApiGateway;
 import tv.mangrana.sonarr.api.schema.queue.Record;
 import tv.mangrana.sonarr.api.schema.series.SonarrSerie;
@@ -16,8 +16,8 @@ public class QueueFixer {
     final static String IMPORT_FAILURE_BECAUSE_MATCHED_BY_ID = "Found matching series via grab history, but release was matched to series by ID. Automatic import is not possible. See the FAQ for details.";
     private final SonarrApiGateway sonarrApiGateway;
 
-    QueueFixer(ConfigFileLoader configFileLoader) {
-        sonarrApiGateway = new SonarrApiGateway(configFileLoader);
+    QueueFixer() {
+        sonarrApiGateway = Sonarr.api();
     }
 
     void fix() {
@@ -61,6 +61,7 @@ public class QueueFixer {
                     .fix();
         } catch (IOException e) {
             System.out.printf("!! could not fix the import %s%n", record.getTitle());
+            e.printStackTrace();
         }
     }
 
