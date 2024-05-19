@@ -1,22 +1,21 @@
 package tv.mangrana.worker;
 
 import tv.mangrana.sonarr.api.schema.queue.Record;
+import tv.mangrana.sonarr.api.schema.series.SonarrSerie;
 
 public class FailedImportFixer {
-    private final String elementTitle;
     private final Record queueRecord;
 
-    private FailedImportFixer(String elementTitle, Record queueRecord) {
-        this.elementTitle = elementTitle;
+    private FailedImportFixer(Record queueRecord) {
         this.queueRecord = queueRecord;
     }
 
-    static FailedImportFixer of(String elementTitle, Record queueRecord) {
-        return new FailedImportFixer(elementTitle, queueRecord);
+    static FailedImportFixer of(Record queueRecord, SonarrSerie serie) {
+        return new FailedImportFixer(queueRecord);
     }
 
     void fix() {
-        System.out.printf("fixing: %s%n",elementTitle);
-        System.out.printf(">> located in: %s%n%n",queueRecord.getOutputPath());
+        System.out.printf("fixing: %s%n" ,queueRecord.getTitle());
+        System.out.printf(">> located in: %s%n%n", queueRecord.getOutputPath());
     }
 }

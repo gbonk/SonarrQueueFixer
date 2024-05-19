@@ -7,6 +7,11 @@ public class MainWorker {
 
     private final QueueFixer queueFixer;
 
+    public static void main(String[] args) throws IncorrectWorkingReferencesException {
+        var worker = new MainWorker();
+        worker.work();
+    }
+
     public MainWorker() throws IncorrectWorkingReferencesException {
         ConfigFileLoader configFileLoader = new ConfigFileLoader();
         queueFixer = new QueueFixer(configFileLoader);
@@ -14,10 +19,5 @@ public class MainWorker {
 
     private void work() {
         queueFixer.fix();
-    }
-
-    public static void main(String[] args) throws IncorrectWorkingReferencesException {
-        var worker = new MainWorker();
-        worker.work();
     }
 }
