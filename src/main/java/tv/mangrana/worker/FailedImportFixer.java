@@ -45,7 +45,7 @@ public class FailedImportFixer {
     }
 
     private List<Path> resolveTorrentFiles() throws IOException {
-        return getVideoFilesFrom(Path.of(queueRecord.getOutputPath()));
+        return getVideoFilesFrom(torrentPath);
     }
 
     private List<Path> resolveSonarrFiles() throws IOException {

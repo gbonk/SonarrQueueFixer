@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class QueueFixer {
     final static String IMPORT_FAILURE_BECAUSE_MATCHED_BY_ID = "Found matching series via grab history, but release was matched to series by ID. Automatic import is not possible. See the FAQ for details.";
@@ -43,7 +42,7 @@ public class QueueFixer {
     private List<Record> filterFailedImportsOfIdProblem(Collection<Record> records) {
         return records.stream()
                 .filter(this::recordsWithImportFailureBecauseIdMatching)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private boolean recordsWithImportFailureBecauseIdMatching(Record record) {

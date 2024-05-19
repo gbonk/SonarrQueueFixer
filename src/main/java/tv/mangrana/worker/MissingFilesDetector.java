@@ -8,23 +8,34 @@ import java.util.stream.Collectors;
 public class MissingFilesDetector {
 
     private Map<Long, List<Path>> sonarrFilesByLength;
+    private Map<Long, List<Path>> torrentFileLengths;
 
     List<Path> getMissingFilesAtDestination(List<Path> torrentFiles, List<Path> sonarrFiles) {
         System.out.printf("going to compare %d torrent files with %d sonar files%n",
                 torrentFiles.size(), sonarrFiles.size());
-        Map<Long, List<Path>> torrentFileLengths = getFileLengthsMapFrom(torrentFiles);
-        if (hasFilesWithSameSize(torrentFileLengths))
-            return torrentFiles;
-        sonarrFilesByLength = getFileLengthsMapFrom(sonarrFiles);
-        if (hasFilesWithSameSize(sonarrFilesByLength))
-            return torrentFiles;
+        digestTorrentFiles(torrentFiles);
+        digestSonarrFiles(sonarrFiles);
+        return resolveMissingFiles();
+    }
 
-        return resolveMissingFiles(torrentFileLengths);
+    private void digestTorrentFiles(List<Path> torrentFiles) {
+        torrentFileLengths = getFileLengthsMapFrom(torrentFiles);
+        throwIfDuplicatedSizes(torrentFileLengths);
+    }
+
+    private void digestSonarrFiles(List<Path> sonarrFiles) {
+        sonarrFilesByLength = getFileLengthsMapFrom(sonarrFiles);
+        throwIfDuplicatedSizes(sonarrFilesByLength);
     }
 
     Map<Long, List<Path>> getFileLengthsMapFrom(List<Path> files) {
         return files.stream()
                 .collect(Collectors.groupingBy(p -> p.toFile().length()));
+    }
+
+    private void throwIfDuplicatedSizes(Map<Long, List<Path>> torrentFileLengths) {
+        if (hasFilesWithSameSize(torrentFileLengths))
+            throw new InsecureScenario();
     }
 
     boolean hasFilesWithSameSize(Map<Long, List<Path>> torrentFileLengths) {
@@ -44,8 +55,8 @@ public class MissingFilesDetector {
         return false;
     }
 
-    private List<Path> resolveMissingFiles(Map<Long, List<Path>> torrentFilesByLength) {
-        return torrentFilesByLength.entrySet()
+    private List<Path> resolveMissingFiles() {
+        return torrentFileLengths.entrySet()
                 .stream()
                 .filter(this::missingAtDestination)
                 .map(Map.Entry::getValue)
@@ -57,4 +68,5 @@ public class MissingFilesDetector {
         return !sonarrFilesByLength.containsKey(torrentFileEntry.getKey());
     }
 
+    private static final class InsecureScenario extends RuntimeException {}
 }
