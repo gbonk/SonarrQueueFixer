@@ -24,12 +24,14 @@
         </repository>
     </repositories>
     <dependencies>
+        <!-- most of logic -->
         <dependency>
             <groupId>tv.mangrana</groupId>
             <artifactId>mangrana-commons</artifactId>
             <version>6.0.0</version>
         </dependency>
 
+        <!-- needed for runtime -->
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-jackson2-provider</artifactId>
@@ -42,22 +44,11 @@
         </dependency>
 
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>4.0.1</version>
+            <groupId>javax.xml</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.1</version>
         </dependency>
 
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.11.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jsonschema2pojo</groupId>
-            <artifactId>jsonschema2pojo-core</artifactId>
-            <version>1.1.2</version>
-        </dependency>
     </dependencies>
 
     <build>
