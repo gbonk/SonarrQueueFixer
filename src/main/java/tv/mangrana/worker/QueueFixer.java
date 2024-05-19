@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 public class QueueFixer {
     final static String IMPORT_FAILURE_BECAUSE_MATCHED_BY_ID = "Found matching series via grab history, but release was matched to series by ID. Automatic import is not possible. See the FAQ for details.";
     private final SonarrApiGateway sonarrApiGateway;
+    private FailedImportFixer failedImportFixer;
 
     QueueFixer() {
         sonarrApiGateway = Sonarr.api();
@@ -56,9 +57,8 @@ public class QueueFixer {
             SonarrSerie serie = getSerieFromSonarr(seriesId);
             if (serie == null) return;
 
-            FailedImportFixer
-                    .of(record, serie)
-                    .fix();
+            failedImportFixer = FailedImportFixer.of(record, serie);
+            failedImportFixer.fix();
         } catch (IOException e) {
             System.out.printf("!! could not fix the import %s%n", record.getTitle());
             e.printStackTrace();

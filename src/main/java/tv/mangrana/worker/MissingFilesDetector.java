@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 public class MissingFilesDetector {
 
     void printDifferencesBetween(List<Path> torrentFiles, List<Path> sonarrFiles) {
+        System.out.printf("going to compare %d torrent files with %d sonar files%n",
+                torrentFiles.size(), sonarrFiles.size());
         Map<Long, List<Path>> torrentFileLengths = getFileLengthsMapFrom(torrentFiles);
         if (hasFilesWithSameSize(torrentFileLengths))
             return;
@@ -15,8 +17,9 @@ public class MissingFilesDetector {
         if (hasFilesWithSameSize(sonarrFileLengths))
             return;
 
-        torrentFileLengths.keySet().forEach(fileSize ->
-                takeDecisionForMismatch(fileSize, torrentFileLengths));
+        torrentFileLengths.keySet().stream()
+                .filter(fileSize -> missingAtDestination(fileSize, sonarrFileLengths))
+                .collect(Collectors.toSet());
 
     }
 
@@ -35,17 +38,14 @@ public class MissingFilesDetector {
     boolean hasMultipleElements(List<Path> paths) {
         if (paths.size() > 1) {
             var sampleFile = paths.get(0).toFile();
-            System.out.printf("There is more than one file with the same size of %s. Name: %s %n",
+            System.out.printf("There is more than one file with the same size of %d. Name: %s %n",
                     sampleFile.length(), sampleFile.getName());
             return true;
         }
         return false;
     }
 
-    void takeDecisionForMismatch(Long fileSize, Map<Long, List<Path>> torrentFileLengths) {
-        var alreadyExists = torrentFileLengths.containsKey(fileSize);
-        if (!alreadyExists) {
-            System.out.printf("- needs to copy %s%n", torrentFileLengths.get(fileSize));
-        }
+    boolean missingAtDestination(Long fileSize, Map<Long, List<Path>> torrentFileLengths) {
+        return !torrentFileLengths.containsKey(fileSize);
     }
 }

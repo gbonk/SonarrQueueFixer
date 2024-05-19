@@ -1,7 +1,9 @@
 package tv.mangrana.worker;
 
+import tv.mangrana.exception.IncorrectWorkingReferencesException;
 import tv.mangrana.sonarr.api.schema.queue.Record;
 import tv.mangrana.sonarr.api.schema.series.SonarrSerie;
+import tv.mangrana.utils.StringCaptor;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,15 +31,26 @@ public class FailedImportFixer {
         System.out.printf(">> located in: %s%n", queueRecord.getOutputPath());
 
         var torrentPath = Path.of(queueRecord.getOutputPath());
-        var sonarPath = Path.of(serie.getPath());
         List<Path> torrentFiles = getVideoFilesFrom(torrentPath);
-        List<Path> sonarFiles = getVideoFilesFrom(sonarPath);
+
+        var seasonFolderName = calculateSeasonPathFrom(torrentPath);
+        var sonarPath = Path.of(serie.getPath());
+        List<Path> sonarFiles = getVideoFilesFrom(sonarPath.resolve(seasonFolderName));
 
         missingFilesDetector.printDifferencesBetween(torrentFiles, sonarFiles);
     }
 
-    private List<Path> getVideoFilesFrom(Path torrentPath) throws IOException {
-        try (var pathWalk = Files.walk(torrentPath, 3)) {
+    private String calculateSeasonPathFrom(Path torrentPath) {
+        try {
+            return StringCaptor.getSeasonFolderNameFromSeason(torrentPath.getFileName().toString());
+        } catch (IncorrectWorkingReferencesException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<Path> getVideoFilesFrom(Path path) throws IOException {
+        System.out.println("going to explore "+path);
+        try (var pathWalk = Files.walk(path, 3)) {
             return pathWalk
                     .filter(p -> p.toFile().isFile())
                     .filter(p -> p.toFile().length() > MINIMUM_FILE_SIZE_TO_BE_CONSIDERED_A_VIDEO)
