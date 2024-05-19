@@ -33,8 +33,16 @@ public class QueueFixer {
 
     private void fixFailedImports(List<Record> recordsWithImportFailure) {
         Map<String, Record> recordsByTitle = new HashMap<>();
-        for (var record : recordsWithImportFailure)
-            recordsByTitle.putIfAbsent(record.getTitle(), record);
-        System.out.println(recordsByTitle.keySet());
+        recordsWithImportFailure.forEach(record ->
+                recordsByTitle.putIfAbsent(record.getTitle(), record));
+
+        recordsByTitle.entrySet().forEach(this::fixFailedImport);
     }
+
+    private void fixFailedImport(Map.Entry<String, Record> recordEntry) {
+        FailedImportFixer
+                .of(recordEntry.getKey(), recordEntry.getValue())
+                .fix();
+    }
+
 }
