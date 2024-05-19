@@ -5,6 +5,7 @@ import tv.mangrana.sonarr.api.client.gateway.SonarrApiGateway;
 import tv.mangrana.sonarr.api.schema.queue.Record;
 import tv.mangrana.sonarr.api.schema.series.SonarrSerie;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +24,7 @@ public class QueueFixer {
         List<Record> sonarQueue = retrieveQueueRecordsFromSonarr();
         Collection<Record> records = deduplicate(sonarQueue);
         List<Record> recordsToFix = filterFailedImportsOfIdProblem(records);
-        recordsToFix.forEach(this::fixFailedImport);
+        recordsToFix.forEach(this::try2FixFailedImport);
     }
 
     private List<Record> retrieveQueueRecordsFromSonarr() {
@@ -49,12 +50,18 @@ public class QueueFixer {
                 .anyMatch(IMPORT_FAILURE_BECAUSE_MATCHED_BY_ID::equals);
     }
 
-    private void fixFailedImport(Record record) {
-        var seriesId = record.getSeriesId();
-        SonarrSerie serie = getSerieFromSonarr(seriesId);
-        FailedImportFixer
-                .of(record, serie)
-                .fix();
+    private void try2FixFailedImport(Record record) {
+        try {
+            var seriesId = record.getSeriesId();
+            SonarrSerie serie = getSerieFromSonarr(seriesId);
+            if (serie == null) return;
+
+            FailedImportFixer
+                    .of(record, serie)
+                    .fix();
+        } catch (IOException e) {
+            System.out.printf("!! could not fix the import %s%n", record.getTitle());
+        }
     }
 
     private SonarrSerie getSerieFromSonarr(Integer seriesId) {
