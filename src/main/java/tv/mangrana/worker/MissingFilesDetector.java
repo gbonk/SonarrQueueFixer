@@ -16,7 +16,7 @@ public class MissingFilesDetector {
             return;
 
         torrentFileLengths.keySet().forEach(fileSize ->
-                takeDecisionForComparing(fileSize, torrentFileLengths));
+                takeDecisionForMismatch(fileSize, torrentFileLengths));
 
     }
 
@@ -42,7 +42,7 @@ public class MissingFilesDetector {
         return false;
     }
 
-    void takeDecisionForComparing(Long fileSize, Map<Long, List<Path>> torrentFileLengths) {
+    void takeDecisionForMismatch(Long fileSize, Map<Long, List<Path>> torrentFileLengths) {
         var alreadyExists = torrentFileLengths.containsKey(fileSize);
         if (!alreadyExists) {
             System.out.printf("- needs to copy %s%n", torrentFileLengths.get(fileSize));
