@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class FailedImportFixer {
@@ -29,9 +30,10 @@ public class FailedImportFixer {
 
         var torrentPath = Path.of(queueRecord.getOutputPath());
         List<Path> torrentFiles = getVideoFilesFrom(torrentPath);
-
         var sonarPath = Path.of(serie.getPath());
         List<Path> sonarFiles = getVideoFilesFrom(sonarPath);
+
+        printDifferencesBetween(torrentFiles, sonarFiles);
     }
 
     private List<Path> getVideoFilesFrom(Path torrentPath) throws IOException {
@@ -41,5 +43,16 @@ public class FailedImportFixer {
                     .filter(p -> p.toFile().length() > MINIMUM_FILE_SIZE_TO_BE_CONSIDERED_A_VIDEO)
                     .collect(Collectors.toList());
         }
+    }
+
+    private void printDifferencesBetween(List<Path> torrentFiles, List<Path> sonarrFiles) {
+        Map<Long, List<Path>> torrentFileLengths = getFileLengthsMapFrom(torrentFiles);
+        Map<Long, List<Path>> sonarrFileLengths = getFileLengthsMapFrom(sonarrFiles);
+        //TODO checks & prints
+    }
+
+    private Map<Long, List<Path>> getFileLengthsMapFrom(List<Path> files) {
+        return files.stream()
+                .collect(Collectors.groupingBy(p -> p.toFile().length()));
     }
 }
