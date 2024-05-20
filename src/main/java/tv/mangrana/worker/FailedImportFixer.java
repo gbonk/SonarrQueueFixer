@@ -9,66 +9,68 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class FailedImportFixer {
-    public static final int MINIMUM_FILE_SIZE_TO_BE_CONSIDERED_A_VIDEO = 300000;
-    private final Record queueRecord;
-    private final MissingFilesDetector missingFilesDetector = new MissingFilesDetector();
-    private final Path torrentPath;
-    private final Path seriePath;
+class FailedImportFixer {
+    static final int MINIMUM_FILE_SIZE_TO_BE_CONSIDERED_A_VIDEO = 300000;
+    
     private final FileCopier fileCopier;
-    private Path seasonPath;
+    private final MissingFilesDetector missingFilesDetector;
+
+    private final Path torrentPath;
+    private final String torrentTitle;
+    private final Path seasonPath;
 
     static Factory factory() {
         return new Factory();
     }
-    public static class Factory {
+    static class Factory {
         FailedImportFixer newFixerFor(Record queueRecord, SonarrSerie serie){
             return new FailedImportFixer(queueRecord, serie);
         }
     }
 
     private FailedImportFixer(Record queueRecord, SonarrSerie serie) {
-        this.queueRecord = queueRecord;
-        this.torrentPath = Path.of(queueRecord.getOutputPath());
-        this.seriePath = Path.of(serie.getPath());
         fileCopier = new FileCopier();
+        missingFilesDetector = new MissingFilesDetector();
+
+        torrentPath = Path.of(queueRecord.getOutputPath());
+        torrentTitle = queueRecord.getTitle();
+
+        var seriePath = Path.of(serie.getPath());
+        seasonPath = seriePath.resolve(tryGettingSeasonFolder());
+    }
+
+    private String tryGettingSeasonFolder() {
+        try {
+            return StringCaptor.getSeasonFolderNameFromSeason(torrentTitle);
+        } catch (IncorrectWorkingReferencesException e) {
+            e.printStackTrace();
+            throw new SeasonFolderUnretrievable();
+        }
     }
 
     void fix() throws IOException {
-        System.out.printf("%nfixing: %s%n" ,queueRecord.getTitle());
-        List<Path> torrentFiles = resolveTorrentFiles();
-        List<Path> sonarFiles = resolveSonarrFiles();
+        System.out.printf("%nfixing: %s%n" , torrentTitle);
+        List<Path> torrentFiles = getVideoFilesFrom(torrentPath);
+        List<Path> sonarFiles = getVideoFilesFrom(seasonPath);
         List<Path> filesToCopy = missingFilesDetector.getMissingFilesAtDestination(torrentFiles, sonarFiles);
         filesToCopy.forEach(this::copy);
     }
 
-    private List<Path> resolveTorrentFiles() throws IOException {
-        return getVideoFilesFrom(torrentPath);
-    }
-
-    private List<Path> resolveSonarrFiles() throws IOException {
-        seasonPath = seriePath.resolve(getSeasonFolder());
-        return getVideoFilesFrom(seasonPath);
-    }
-
-    private String getSeasonFolder() {
-        try {
-            return StringCaptor.getSeasonFolderNameFromSeason(torrentPath.getFileName().toString());
-        } catch (IncorrectWorkingReferencesException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private List<Path> getVideoFilesFrom(Path path) throws IOException {
         System.out.println("going to explore "+path);
-        try (var pathWalk = Files.walk(path, 3)) {
-            return pathWalk
-                    .filter(p -> p.toFile().isFile())
-                    .filter(p -> p.toFile().length() > MINIMUM_FILE_SIZE_TO_BE_CONSIDERED_A_VIDEO)
-                    .collect(Collectors.toList());
+        try (var pathsWalk = Files.walk(path, 3)) {
+            return pathsWalk
+                    .filter(this::isFile)
+                    .filter(this::isAVideo)
+                    .toList();
         }
+    }
+    private boolean isFile(Path path) {
+        return path.toFile().isFile();
+    }
+    private boolean isAVideo(Path path) {
+        return path.toFile().length() > MINIMUM_FILE_SIZE_TO_BE_CONSIDERED_A_VIDEO;
     }
 
     private void copy(Path fileToCopy) {
@@ -76,4 +78,6 @@ public class FailedImportFixer {
         System.out.println("** going to hardlink file to "+target);
         fileCopier.hardLink(fileToCopy, target);
     }
+
+    static class SeasonFolderUnretrievable extends RuntimeException {}
 }

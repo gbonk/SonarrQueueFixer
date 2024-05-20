@@ -13,7 +13,7 @@ public class MainWorker {
         worker.work();
     }
 
-    public MainWorker() throws IncorrectWorkingReferencesException {
+    private MainWorker() throws IncorrectWorkingReferencesException {
         var configLoader = ConfigFileLoader.getLoader();
         Sonarr.initService(configLoader);
         queueFixer = new QueueFixer();

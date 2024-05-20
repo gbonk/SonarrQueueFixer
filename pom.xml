@@ -42,7 +42,7 @@
             <artifactId>resteasy-client</artifactId>
             <version>3.5.0.Final</version>
         </dependency>
-
+        <!-- needed for java 17 compatibility -->
         <dependency>
             <groupId>javax.xml</groupId>
             <artifactId>jaxb-api</artifactId>

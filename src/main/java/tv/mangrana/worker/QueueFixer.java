@@ -9,22 +9,22 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class QueueFixer {
     final static String IMPORT_FAILURE_BECAUSE_MATCHED_BY_ID = "Found matching series via grab history, but release was matched to series by ID. Automatic import is not possible. See the FAQ for details.";
+
     private final SonarrApiGateway sonarrApiGateway;
-    private final FailedImportFixer.Factory failedImportFixerFactory;
+    private final FailedImportFixer.Factory fixerFactory;
 
     QueueFixer() {
         sonarrApiGateway = Sonarr.api();
-        failedImportFixerFactory = FailedImportFixer.factory();
+        fixerFactory = FailedImportFixer.factory();
     }
 
     void fix() {
         List<Record> sonarQueue = retrieveQueueRecordsFromSonarr();
-        Collection<Record> records = deduplicate(sonarQueue);
-        List<Record> recordsToFix = filterFailedImportsOfIdProblem(records);
+        var distinctRecords = deduplicate(sonarQueue);
+        var recordsToFix = filterFailedImportsOfIdProblem(distinctRecords);
         recordsToFix.forEach(this::try2FixFailedImport);
     }
 
@@ -33,9 +33,9 @@ public class QueueFixer {
     }
 
     private Collection<Record> deduplicate(List<Record> repetitiveRecords) {
-        Map<String, Record> recordsByTitle = new HashMap<>();
-        repetitiveRecords.forEach(record ->
-                recordsByTitle.putIfAbsent(record.getTitle(), record));
+        var recordsByTitle = new HashMap<String, Record>();
+        for (var record : repetitiveRecords)
+            recordsByTitle.putIfAbsent(record.getTitle(), record);
         return recordsByTitle.values();
     }
 
@@ -45,19 +45,13 @@ public class QueueFixer {
                 .toList();
     }
 
-    private boolean recordsWithImportFailureBecauseIdMatching(Record record) {
-        return record.getStatusMessages().stream()
-                .flatMap(status -> status.getMessages().stream())
-                .anyMatch(IMPORT_FAILURE_BECAUSE_MATCHED_BY_ID::equals);
-    }
-
     private void try2FixFailedImport(Record record) {
         try {
             var seriesId = record.getSeriesId();
-            SonarrSerie serie = getSerieFromSonarr(seriesId);
+            SonarrSerie serie = sonarrApiGateway.getSerieById(seriesId);
             if (serie == null) return;
 
-            failedImportFixerFactory
+            fixerFactory
                     .newFixerFor(record, serie)
                     .fix();
         } catch (IOException e) {
@@ -66,8 +60,10 @@ public class QueueFixer {
         }
     }
 
-    private SonarrSerie getSerieFromSonarr(Integer seriesId) {
-        return sonarrApiGateway.getSerieById(seriesId);
+    private boolean recordsWithImportFailureBecauseIdMatching(Record record) {
+        return record.getStatusMessages().stream()
+                .flatMap(status -> status.getMessages().stream())
+                .anyMatch(IMPORT_FAILURE_BECAUSE_MATCHED_BY_ID::equals);
     }
 
 }

@@ -18,7 +18,6 @@ public class ConfigFileLoader extends CommonConfigFileLoader<ConfigFileLoader.Pr
     }
 
     public enum ProjectConfiguration {
-        UPLOADS_PATHS
     }
 
     @Override
