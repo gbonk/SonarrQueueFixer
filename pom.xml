@@ -24,11 +24,11 @@
         </repository>
     </repositories>
     <dependencies>
-        <!-- most of logic -->
+        <!-- most common logic -->
         <dependency>
             <groupId>tv.mangrana</groupId>
             <artifactId>mangrana-commons</artifactId>
-            <version>7.0.0</version>
+            <version>7.1.2</version>
         </dependency>
 
         <!-- needed for runtime -->

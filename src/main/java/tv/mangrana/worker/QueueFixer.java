@@ -26,6 +26,7 @@ public class QueueFixer {
         var distinctRecords = deduplicate(sonarQueue);
         var recordsToFix = filterFailedImportsOfIdProblem(distinctRecords);
         recordsToFix.forEach(this::try2FixFailedImport);
+        cleanWorkedElementsFromQueue(sonarQueue, recordsToFix);
     }
 
     private List<Record> retrieveQueueRecordsFromSonarr() {
@@ -60,10 +61,29 @@ public class QueueFixer {
         }
     }
 
+    private void cleanWorkedElementsFromQueue(List<Record> sonarQueue, List<Record> recordsToFix) {
+        List<String> workedTitles = mapRecord2Title(recordsToFix);
+        List<Integer> recordIds2Delete = filterPresentTitlesFromQueue(sonarQueue, workedTitles);
+        sonarrApiGateway.deleteQueueElements(recordIds2Delete);
+    }
+
     private boolean recordsWithImportFailureBecauseIdMatching(Record record) {
         return record.getStatusMessages().stream()
                 .flatMap(status -> status.getMessages().stream())
                 .anyMatch(IMPORT_FAILURE_BECAUSE_MATCHED_BY_ID::equals);
     }
 
+    private List<String> mapRecord2Title(List<Record> records) {
+        return records.stream()
+                .map(Record::getTitle)
+                .distinct()
+                .toList();
+    }
+
+    private List<Integer> filterPresentTitlesFromQueue(List<Record> sonarQueue, List<String> workedTitles) {
+        return sonarQueue.stream()
+                .filter(r -> workedTitles.contains(r.getTitle()))
+                .map(Record::getId)
+                .toList();
+    }
 }
