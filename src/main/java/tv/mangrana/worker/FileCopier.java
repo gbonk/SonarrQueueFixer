@@ -32,7 +32,10 @@ class FileCopier {
     }
 
     private boolean isTemporaryDestination(Path destination) {
+        String temporaryFolderName = ConfigLoader.getLoader()
+                .getConfig(UPLOADS_PATHS)
+                .toLowerCase();
         return destination.toString()
-                .contains(UPLOADS_PATHS.name().toLowerCase());
+                .contains(temporaryFolderName);
     }
 }
