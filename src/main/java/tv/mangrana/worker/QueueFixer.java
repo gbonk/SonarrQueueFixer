@@ -18,12 +18,12 @@ public class QueueFixer {
     private final SonarrApiGateway sonarrApiGateway;
     private final FailedImportFixer.Factory fixerFactory;
 
-    private final SonarrDeferredRefresher sonarrDeferredRefresher;
+    private final SonarrDeferredRefresher.Factory seriesRefresherFactory;
 
     QueueFixer(SonarrApiGateway sonarGateway) {
         sonarrApiGateway = sonarGateway;
         fixerFactory = FailedImportFixer.factory();
-        sonarrDeferredRefresher = new SonarrDeferredRefresher();
+        seriesRefresherFactory = SonarrDeferredRefresher.factory();
     }
 
     void fix() {
@@ -98,7 +98,10 @@ public class QueueFixer {
         Set<Integer> seriesToRefresh = recordsToFix.stream()
                 .map(Record::getSeriesId)
                 .collect(Collectors.toSet());
+
         System.out.printf("** going to refresh the following series %s%n", seriesToRefresh);
-        sonarrDeferredRefresher.refreshSeries(seriesToRefresh);
+        seriesRefresherFactory
+                .forSeriesSet(seriesToRefresh)
+                .refresh();
     }
 }

@@ -10,13 +10,30 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class SonarrDeferredRefresher {
-    private static final ScheduledExecutorService deferredRefresher = new ScheduledThreadPoolExecutor(1);
-    private final SonarrApiGateway sonarrApiGateway = Sonarr.api();
-    public void refreshSeries(Set<Integer> seriesToRefresh) {
+    private final SonarrApiGateway sonarrApiGateway;
+    private final ScheduledExecutorService deferredRefresher;
+    private final Set<Integer> seriesToRefresh;
+
+    static Factory factory() {
+        return new Factory();
+    }
+    static class Factory {
+        SonarrDeferredRefresher forSeriesSet(Set<Integer> seriesToRefresh) {
+            return new SonarrDeferredRefresher(seriesToRefresh);
+        }
+    }
+    private SonarrDeferredRefresher(Set<Integer> seriesToRefresh) {
+        sonarrApiGateway = Sonarr.api();
+        deferredRefresher  = new ScheduledThreadPoolExecutor(1);
+        this.seriesToRefresh = seriesToRefresh;
+    }
+
+    public void refresh() {
         for (var serieId : seriesToRefresh) {
             Runnable refreshTask = () -> sonarrApiGateway.refreshSerie(serieId);
             if (!ConfigLoader.isTestMode())
                 deferredRefresher.schedule(refreshTask, 5, TimeUnit.SECONDS);
         }
+        deferredRefresher.shutdown();
     }
 }
