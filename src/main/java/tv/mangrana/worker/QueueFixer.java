@@ -1,5 +1,6 @@
 package tv.mangrana.worker;
 
+import tv.mangrana.config.ConfigLoader;
 import tv.mangrana.sonarr.Sonarr;
 import tv.mangrana.sonarr.api.client.gateway.SonarrApiGateway;
 import tv.mangrana.sonarr.api.schema.queue.Record;
@@ -9,6 +10,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+
+import static tv.mangrana.config.ConfigLoader.ProjectConfiguration.TEST_MODE;
 
 public class QueueFixer {
     final static String IMPORT_FAILURE_BECAUSE_MATCHED_BY_ID = "Found matching series via grab history, but release was matched to series by ID. Automatic import is not possible. See the FAQ for details.";
@@ -64,7 +67,8 @@ public class QueueFixer {
     private void cleanWorkedElementsFromQueue(List<Record> sonarQueue, List<Record> recordsToFix) {
         List<String> workedTitles = mapRecord2Title(recordsToFix);
         List<Integer> recordIds2Delete = filterPresentTitlesFromQueue(sonarQueue, workedTitles);
-        sonarrApiGateway.deleteQueueElements(recordIds2Delete);
+        if (ConfigLoader.isDisabled(TEST_MODE))
+            sonarrApiGateway.deleteQueueElements(recordIds2Delete);
     }
 
     private boolean recordsWithImportFailureBecauseIdMatching(Record record) {
