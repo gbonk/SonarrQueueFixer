@@ -98,6 +98,7 @@ public class QueueFixer {
         Set<Integer> seriesToRefresh = recordsToFix.stream()
                 .map(Record::getSeriesId)
                 .collect(Collectors.toSet());
+        System.out.printf("** going to refresh the following series %s%n", seriesToRefresh);
         sonarrDeferredRefresher.refreshSeries(seriesToRefresh);
     }
 }
