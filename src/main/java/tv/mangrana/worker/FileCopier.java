@@ -25,7 +25,7 @@ class FileCopier {
     private void createDestinationFolderIfApply(Path destinationFile) throws IOException {
         var destinationFolder = destinationFile.getParent();
         if (isTemporaryDestination(destinationFolder) && !Files.exists(destinationFolder)) {
-            System.out.printf("destination folder %s will be created", destinationFolder);
+            System.out.printf("destination folder %s will be created%n", destinationFolder);
             if (!ConfigLoader.isTestMode())
                 Files.createDirectories(destinationFile);
         }

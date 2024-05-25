@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class QueueFixer {
     final static String IMPORT_FAILURE_BECAUSE_MATCHED_BY_ID = "Found matching series via grab history, but release was matched to series by ID. Automatic import is not possible. See the FAQ for details.";
@@ -16,9 +18,12 @@ public class QueueFixer {
     private final SonarrApiGateway sonarrApiGateway;
     private final FailedImportFixer.Factory fixerFactory;
 
+    private final SonarrDeferredRefresher sonarrDeferredRefresher;
+
     QueueFixer(SonarrApiGateway sonarGateway) {
         sonarrApiGateway = sonarGateway;
         fixerFactory = FailedImportFixer.factory();
+        sonarrDeferredRefresher = new SonarrDeferredRefresher();
     }
 
     void fix() {
@@ -27,6 +32,7 @@ public class QueueFixer {
         var recordsToFix = filterFailedImportsOfIdProblem(distinctRecords);
         recordsToFix.forEach(this::try2FixFailedImport);
         cleanWorkedElementsFromQueue(sonarQueue, recordsToFix);
+        refreshSeries(recordsToFix);
     }
 
     private List<Record> retrieveQueueRecordsFromSonarr() {
@@ -86,5 +92,12 @@ public class QueueFixer {
                 .filter(r -> workedTitles.contains(r.getTitle()))
                 .map(Record::getId)
                 .toList();
+    }
+
+    private void refreshSeries(List<Record> recordsToFix) {
+        Set<Integer> seriesToRefresh = recordsToFix.stream()
+                .map(Record::getSeriesId)
+                .collect(Collectors.toSet());
+        sonarrDeferredRefresher.refreshSeries(seriesToRefresh);
     }
 }
