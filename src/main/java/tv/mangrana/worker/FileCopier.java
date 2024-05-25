@@ -23,11 +23,12 @@ class FileCopier {
         }
     }
 
-    private void createDestinationFolderIfApply(Path destination) throws IOException {
-        if (isTemporaryDestination(destination) && !Files.exists(destination)) {
-            System.out.printf("destination folder %s will be created", destination);
+    private void createDestinationFolderIfApply(Path destinationFile) throws IOException {
+        var destinationFolder = destinationFile.getParent();
+        if (isTemporaryDestination(destinationFolder) && !Files.exists(destinationFolder)) {
+            System.out.printf("destination folder %s will be created", destinationFolder);
             if (ConfigLoader.isDisabled(TEST_MODE))
-                Files.createDirectory(destination);
+                Files.createDirectories(destinationFile);
         }
     }
 
