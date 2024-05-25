@@ -30,7 +30,7 @@ public class ConfigLoader extends CommonConfigFileLoader<ConfigLoader.ProjectCon
     }
 
     public static boolean isTestMode(){
-        return isUnitTesting || get(TEST_MODE).equals("true");
+        return isUnitTesting || isEnabled(TEST_MODE);
     }
     public static void weAreUnitTesting() {
         isUnitTesting = true;
