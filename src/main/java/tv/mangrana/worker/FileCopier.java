@@ -14,7 +14,7 @@ class FileCopier {
         try {
             createDestinationFolderIfApply(destination);
 
-            if (ConfigLoader.isDisabled(TEST_MODE))
+            if (!ConfigLoader.isEnabled(TEST_MODE))
                 Files.createLink(destination, source);
         } catch (IOException e) {
             System.out.printf("error when creating hardlink with destination %s, error: %s%n",
@@ -27,7 +27,7 @@ class FileCopier {
         var destinationFolder = destinationFile.getParent();
         if (isTemporaryDestination(destinationFolder) && !Files.exists(destinationFolder)) {
             System.out.printf("destination folder %s will be created", destinationFolder);
-            if (ConfigLoader.isDisabled(TEST_MODE))
+            if (!ConfigLoader.isEnabled(TEST_MODE))
                 Files.createDirectories(destinationFile);
         }
     }

@@ -59,7 +59,7 @@ class FailedImportFixer {
 
     private List<Path> getVideoFilesFrom(Path path) throws IOException {
         if (!Files.exists(path)) {
-            System.out.printf("path %s doesn't exist on the filesystem", path);
+            System.out.printf("path %s doesn't exist on the filesystem%n", path);
             return List.of();
         }
         System.out.println("going to explore "+path);

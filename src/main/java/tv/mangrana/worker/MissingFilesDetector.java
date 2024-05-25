@@ -11,6 +11,10 @@ class MissingFilesDetector {
     private Map<Long, List<Path>> torrentFilesByLength;
 
     List<Path> getMissingFilesAtDestination(List<Path> torrentFiles, List<Path> sonarrFiles) {
+        if (sonarrFiles.size() == 0) {
+            System.out.println("All files are missing at destination");
+            return torrentFiles;
+        }
         System.out.printf("going to compare %d torrent files with %d sonar files%n",
                 torrentFiles.size(), sonarrFiles.size());
         digestTorrentFiles(torrentFiles);

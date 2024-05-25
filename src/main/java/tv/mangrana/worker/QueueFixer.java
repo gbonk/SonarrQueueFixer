@@ -67,7 +67,7 @@ public class QueueFixer {
     private void cleanWorkedElementsFromQueue(List<Record> sonarQueue, List<Record> recordsToFix) {
         List<String> workedTitles = mapRecord2Title(recordsToFix);
         List<Integer> recordIds2Delete = filterPresentTitlesFromQueue(sonarQueue, workedTitles);
-        if (ConfigLoader.isDisabled(TEST_MODE))
+        if (!ConfigLoader.isEnabled(TEST_MODE))
             sonarrApiGateway.deleteQueueElements(recordIds2Delete);
     }
 

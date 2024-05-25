@@ -21,8 +21,8 @@ public class ConfigLoader extends CommonConfigFileLoader<ConfigLoader.ProjectCon
         return getLoader().getConfig(configParam);
     }
 
-    public static boolean isDisabled(ProjectConfiguration configParam) {
-        return !"true".equals(get(configParam));
+    public static boolean isEnabled(ProjectConfiguration configParam) {
+        return get(configParam).equals("true");
     }
 
     public enum ProjectConfiguration {
