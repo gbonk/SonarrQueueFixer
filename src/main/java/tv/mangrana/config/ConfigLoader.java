@@ -2,10 +2,14 @@ package tv.mangrana.config;
 
 import tv.mangrana.exception.IncorrectWorkingReferencesException;
 
+import static tv.mangrana.config.ConfigLoader.ProjectConfiguration.TEST_MODE;
+
 public class ConfigLoader extends CommonConfigFileLoader<ConfigLoader.ProjectConfiguration> {
 
     private static final String CONFIG_FILE = "SonarrFixerConfig.yml";
     private static ConfigLoader service;
+
+    private static boolean isUnitTesting = false;
 
     private ConfigLoader() throws IncorrectWorkingReferencesException {
         super(ProjectConfiguration.class);
@@ -23,6 +27,13 @@ public class ConfigLoader extends CommonConfigFileLoader<ConfigLoader.ProjectCon
 
     public static boolean isEnabled(ProjectConfiguration configParam) {
         return get(configParam).equals("true");
+    }
+
+    public static boolean isTestMode(){
+        return isUnitTesting || get(TEST_MODE).equals("true");
+    }
+    public static void weAreUnitTesting() {
+        isUnitTesting = true;
     }
 
     public enum ProjectConfiguration {

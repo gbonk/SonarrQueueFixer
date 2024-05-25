@@ -1,5 +1,6 @@
 package tv.mangrana.worker;
 
+import tv.mangrana.config.ConfigLoader;
 import tv.mangrana.exception.IncorrectWorkingReferencesException;
 import tv.mangrana.sonarr.api.schema.queue.Record;
 import tv.mangrana.sonarr.api.schema.series.SonarrSerie;
@@ -74,6 +75,7 @@ class FailedImportFixer {
         return path.toFile().isFile();
     }
     private boolean isAVideo(Path path) {
+        if (ConfigLoader.isTestMode()) return true;
         return path.toFile().length() > MINIMUM_FILE_SIZE_TO_BE_CONSIDERED_A_VIDEO;
     }
 

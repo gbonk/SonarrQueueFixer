@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static tv.mangrana.config.ConfigLoader.ProjectConfiguration.TEST_MODE;
 import static tv.mangrana.config.ConfigLoader.ProjectConfiguration.UPLOADS_PATHS;
 
 class FileCopier {
@@ -14,7 +13,7 @@ class FileCopier {
         try {
             createDestinationFolderIfApply(destination);
 
-            if (!ConfigLoader.isEnabled(TEST_MODE))
+            if (!ConfigLoader.isTestMode())
                 Files.createLink(destination, source);
         } catch (IOException e) {
             System.out.printf("error when creating hardlink with destination %s, error: %s%n",
@@ -27,7 +26,7 @@ class FileCopier {
         var destinationFolder = destinationFile.getParent();
         if (isTemporaryDestination(destinationFolder) && !Files.exists(destinationFolder)) {
             System.out.printf("destination folder %s will be created", destinationFolder);
-            if (!ConfigLoader.isEnabled(TEST_MODE))
+            if (!ConfigLoader.isTestMode())
                 Files.createDirectories(destinationFile);
         }
     }
