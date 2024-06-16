@@ -15,8 +15,8 @@
 
     <repositories>
         <repository>
-            <id>mangrana_repo</id>
-            <url>https://mavenrepo.mangrana.tv/snapshots</url>
+            <id>gitea</id>
+            <url>https://git.hack3.cat/api/packages/Mangrana/maven</url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
@@ -28,7 +28,7 @@
         <dependency>
             <groupId>tv.mangrana</groupId>
             <artifactId>mangrana-commons</artifactId>
-            <version>7.2.0</version>
+            <version>7.2.1</version>
         </dependency>
 
         <!-- needed for runtime -->
