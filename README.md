@@ -1,11 +1,22 @@
-Trying to solve the always repeated warning that forces to do a manual import, which by the way fails a lot and does not handle all the files. 
-This project aims to fully automate the solve of this issue.
+# Motivation
+## Common error
+![image](misc/cause.png)
+### Why this happens?
+The truth is I don't know. 
+I have alternative ways to add new content to my flows which take a different path (instead of be added to Sonarr first I download them manually) but this happens in the normal path. I mean, I add a TV show to Sonarr, he identifies a download related and downloads it. Once finished he complains about not being able to continue.
+This has been happening to me quite much the last year.
+### Manual solution
+![image](misc/manual_solution.png)
+Ok, there is a way to solve it manually, which is click the import icon and fulfill the form (which always asks to input a "Release Group" description), but it means that I have to enter Sonarr regularly to check if there is some "blocked download" and do this repeated action over and over, which after many times it becomes quite tedious.
+### The workaround
+I definetly don't want to spent more time ever on manual repeated process when I can make a robot do it for me.
+So here is the trick! 
+1. Ask to Sonarr API the elements on **Activity > Queue** that has the matching warning
+2. For every "blocked download" with this problem
+   1. Note it's related torrent download folder
+   2. Note it's destination folder (the one that Sonarr copies to when all works fine)
+   3. Copy, using hardlink option, all the episode video files to destination
+3. Clean from queue the elements fixed successfully
+4. Refresh the series related to the changes be reflected
 
-![image](https://github.com/xeviff/SonarrQueueFixer/assets/73612508/d5966c9c-077a-4928-aaef-192244b22066)
-
-Finally it has worked fine. No more manual actions required anymore !!!!! :D
-![image](https://github.com/xeviff/SonarrQueueFixer/assets/73612508/3ffc32ab-1ce5-4829-802a-df7aefd4189f)
-
-![image](https://github.com/xeviff/SonarrQueueFixer/assets/73612508/34835a03-ead1-4209-a99f-a487f2e80d2f)
-
-![image](https://github.com/xeviff/SonarrQueueFixer/assets/73612508/637dbc51-10bb-4904-9428-a8e11dd4d5c5)
+This basically imitates the "correct" Sonarr behaviour, skipping the error.
