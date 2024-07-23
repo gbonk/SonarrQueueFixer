@@ -20,3 +20,15 @@ So here is the trick!
 4. Refresh the series related to the changes be reflected
 
 This basically imitates the "correct" Sonarr behaviour, skipping the error.
+# Result
+Here is an example execution:
+![image](misc/run.png)
+
+We can see in the logs that it seems the things have went well.
+If I check the Sonarr queue, the warning has gone:
+
+![image](misc/sonarAfter.png)
+
+And if we check the TV show detail, we see that now a recognized episode appears (the one related with the download), showing its filesystem fingerprint.
+
+![image](misc/episode.png)
