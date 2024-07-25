@@ -1,9 +1,10 @@
 ---
 version: "2.1"
 services:
-  after-download-carer:
+  sonarr_queue_fix:
     container_name: mangrana_java_sonarr_queue_fix
     image: xeviff/sonarr_queue_fix:latest
+    user: "1026"
     volumes:
       - ./config:/config
       - /volume1/data:/data
