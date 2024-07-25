@@ -6,13 +6,20 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Set;
 
 import static tv.mangrana.config.ConfigLoader.ProjectConfiguration.UPLOADS_PATHS;
 
 class FileCopier {
 
-    public static final String UNIX_ALL_PERMISSIONS = "rwxrwxrwx";
+    static final String UNIX_ALL_PERMISSIONS = "rwxrwxrwx";
+    static final FileAttribute<Set<PosixFilePermission>> ALL_PERMITTED_FILE_ATTRIBUTE;
+    static {
+        var allPermitted = PosixFilePermissions.fromString(UNIX_ALL_PERMISSIONS);
+        ALL_PERMITTED_FILE_ATTRIBUTE = PosixFilePermissions.asFileAttribute(allPermitted);
+    }
 
     void hardLink(Path source, Path destination) {
         try {
@@ -32,7 +39,7 @@ class FileCopier {
         if (isTemporaryDestination(destinationFolder) && !Files.exists(destinationFolder)) {
             System.out.printf("** destination folder %s will be created%n", destinationFolder);
             if (!ConfigLoader.isTestMode())
-                Files.createDirectories(destinationFolder, getAllPermissionsAttribute());
+                Files.createDirectories(destinationFolder, ALL_PERMITTED_FILE_ATTRIBUTE);
         }
     }
 
@@ -44,8 +51,4 @@ class FileCopier {
                 .contains(temporaryFolderName);
     }
 
-    private FileAttribute<?> getAllPermissionsAttribute() {
-        var allPermitted = PosixFilePermissions.fromString(UNIX_ALL_PERMISSIONS);
-        return PosixFilePermissions.asFileAttribute(allPermitted);
-    }
 }
