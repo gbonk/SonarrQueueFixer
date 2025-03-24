@@ -1,3 +1,24 @@
+
+"Forked" from `https://git.hack3.cat/Mangrana/SonarrQueueFixer.git`
+
+# Configuration
+
+Rename file `config/SonarrFixerConfig.yml.sample` to `SonarrFixerConfig.yml`
+
+* sonarr_api_host: The host name or IP. No port or `https://` allowed
+* sonarr_api_key: See sonar documentation on how to acquire.
+* test_mode: true or false
+* uploads_paths: Not sure what this is for. Must not be null.
+
+### Minimal
+
+```
+sonarr_api_host: 192.168.1.6
+sonarr_api_key: 66e4...
+test_mode: false
+uploads_paths: temp123
+```
+
 # Motivation
 ## Common error
 ![image](misc/cause.png)
