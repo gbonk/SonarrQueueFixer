@@ -1,7 +1,5 @@
 package tv.mangrana.worker;
 
-import tv.mangrana.config.ConfigLoader;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,6 +8,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Set;
 
+import tv.mangrana.config.ConfigLoader;
 import static tv.mangrana.config.ConfigLoader.ProjectConfiguration.UPLOADS_PATHS;
 
 class FileCopier {
@@ -19,6 +18,19 @@ class FileCopier {
     static {
         var allPermitted = PosixFilePermissions.fromString(UNIX_ALL_PERMISSIONS);
         ALL_PERMITTED_FILE_ATTRIBUTE = PosixFilePermissions.asFileAttribute(allPermitted);
+    }
+
+    void copyFile(Path source, Path destination) {
+        try {
+            createDestinationFolderIfApply(destination);
+
+            if (!ConfigLoader.isTestMode())
+                Files.copy(source, destination);
+        } catch (IOException e) {
+            System.out.printf("error when copying file with destination %s, error: %s%n",
+                    destination, e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     void hardLink(Path source, Path destination) {

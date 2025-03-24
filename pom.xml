@@ -28,7 +28,7 @@
         <dependency>
             <groupId>tv.mangrana</groupId>
             <artifactId>mangrana-commons</artifactId>
-            <version>7.2.1</version>
+            <version>7.2.2-BONK</version>
         </dependency>
 
         <!-- needed for runtime -->

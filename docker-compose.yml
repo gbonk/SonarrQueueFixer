@@ -7,4 +7,4 @@ services:
     user: "1026"
     volumes:
       - ./config:/config
-      - /volume1/data:/data
+      - ./data:/data

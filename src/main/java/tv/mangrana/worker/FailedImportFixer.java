@@ -1,15 +1,15 @@
 package tv.mangrana.worker;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
 import tv.mangrana.config.ConfigLoader;
 import tv.mangrana.exception.IncorrectWorkingReferencesException;
 import tv.mangrana.sonarr.api.schema.queue.Record;
 import tv.mangrana.sonarr.api.schema.series.SonarrSerie;
 import tv.mangrana.utils.StringCaptor;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
 
 class FailedImportFixer {
     static final int MINIMUM_FILE_SIZE_TO_BE_CONSIDERED_A_VIDEO = 300000;
@@ -81,8 +81,8 @@ class FailedImportFixer {
 
     private void copy(Path fileToCopy) {
         Path target = seasonPath.resolve(fileToCopy.getFileName());
-        System.out.println("** going to hardlink file to "+target);
-        fileCopier.hardLink(fileToCopy, target);
+        System.out.println("** going to copy file to "+target);
+        fileCopier.copyFile(fileToCopy, target);
     }
 
     static class SeasonFolderUnretrievable extends RuntimeException {}
